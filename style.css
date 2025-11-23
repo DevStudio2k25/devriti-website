@@ -381,6 +381,27 @@ body {
         left: 1rem;
         font-size: 0.9rem;
     }
+
+    /* Always show edit mode button on mobile */
+    .edit-mode-btn {
+        opacity: 1;
+        position: relative;
+        top: 0;
+        left: 0;
+        margin-bottom: 1rem;
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Always show card actions on mobile */
+    .card-actions {
+        opacity: 1;
+    }
+
+    /* Show feature item actions in edit mode on mobile */
+    .feature-card.edit-mode .feature-item-actions {
+        display: flex;
+    }
 }
 
 /* Modal
@@ -580,6 +601,36 @@ body {
     opacity: 1;
 }
 
+.edit-mode-btn {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    width: auto;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+    z-index: 10;
+}
+
+.edit-mode-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(142, 130, 112, 0.3);
+}
+
+.edit-mode-btn.active {
+    background: linear-gradient(135deg, #8E8270, #6B6B6B);
+}
+
 .edit-btn,
 .delete-btn {
     width: 32px;
@@ -595,23 +646,23 @@ body {
 }
 
 .edit-btn {
-    background-color: #4A90E2;
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
     color: white;
 }
 
 .edit-btn:hover {
-    background-color: #357ABD;
     transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(142, 130, 112, 0.4);
 }
 
 .delete-btn {
-    background-color: #E74C3C;
+    background: linear-gradient(135deg, #D4A574, #B8956A);
     color: white;
 }
 
 .delete-btn:hover {
-    background-color: #C0392B;
     transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(212, 165, 116, 0.4);
 }
 
 /* Not Required Tag */
@@ -660,14 +711,17 @@ body {
 }
 
 .feature-item-actions {
-    display: flex;
+    display: none;
     gap: 0.3rem;
-    opacity: 0;
     transition: var(--transition);
 }
 
+.feature-card.edit-mode .feature-item-actions {
+    display: flex;
+}
+
 .feature-card li:hover .feature-item-actions {
-    opacity: 1;
+    display: flex;
 }
 
 .mini-edit-btn,
@@ -685,21 +739,62 @@ body {
 }
 
 .mini-edit-btn {
-    background-color: #4A90E2;
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
     color: white;
 }
 
 .mini-edit-btn:hover {
-    background-color: #357ABD;
     transform: scale(1.1);
+    box-shadow: 0 3px 10px rgba(142, 130, 112, 0.4);
 }
 
 .mini-delete-btn {
-    background-color: #E74C3C;
+    background: linear-gradient(135deg, #D4A574, #B8956A);
     color: white;
 }
 
 .mini-delete-btn:hover {
-    background-color: #C0392B;
     transform: scale(1.1);
+    box-shadow: 0 3px 10px rgba(212, 165, 116, 0.4);
+}
+
+/* Sub-section styling */
+.sub-section {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--accent-light);
+}
+
+.sub-section h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+    color: var(--accent-dark);
+    font-weight: 600;
+}
+
+.sub-section-actions {
+    display: none;
+    gap: 0.3rem;
+    margin-top: 0.5rem;
+}
+
+.feature-card.edit-mode .sub-section-actions {
+    display: flex;
+}
+
+.add-subsection-btn {
+    padding: 0.5rem 1rem;
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    border: 2px dashed var(--accent-color);
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: none;
+}
+
+.feature-card.edit-mode .add-subsection-btn {
+    display: inline-block;
 }

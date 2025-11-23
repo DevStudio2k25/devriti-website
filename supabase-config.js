@@ -265,6 +265,27 @@ async function editSubFeature(featureId, featureIndex, newText) {
     }
 }
 
+// Toggle edit mode for a card
+function toggleEditMode(featureId) {
+    const card = document.querySelector(`[data-feature-id="${featureId}"]`);
+    if (card) {
+        card.classList.toggle('edit-mode');
+        const btn = card.querySelector('.edit-mode-btn');
+        if (btn) {
+            btn.classList.toggle('active');
+            const icon = btn.querySelector('i');
+            const text = btn.querySelector('span');
+            if (card.classList.contains('edit-mode')) {
+                icon.className = 'fa-solid fa-check';
+                text.textContent = 'Done';
+            } else {
+                icon.className = 'fa-solid fa-pen-to-square';
+                text.textContent = 'Edit Mode';
+            }
+        }
+    }
+}
+
 // Generate feature card HTML from database data
 function generateFeatureCard(feature) {
     const highlightClass = feature.is_highlight ? 'highlight not-required' : '';
@@ -274,7 +295,7 @@ function generateFeatureCard(feature) {
     if (feature.sub_features) {
         const subFeatures = feature.sub_features;
         
-        if (subFeatures.features) {
+        if (subFeatures.features && subFeatures.features.length > 0) {
             featuresHTML = '<ul>' + subFeatures.features.map((f, index) => `
                 <li>
                     <span class="feature-text">${f}</span>
@@ -290,11 +311,23 @@ function generateFeatureCard(feature) {
             `).join('') + '</ul>';
         }
         
-        if (subFeatures.sections) {
-            featuresHTML = subFeatures.sections.map(section => `
+        if (subFeatures.sections && subFeatures.sections.length > 0) {
+            featuresHTML = subFeatures.sections.map((section, sectionIndex) => `
                 <div class="sub-section">
                     <h3>${section.name}</h3>
-                    <ul>${section.features.map(f => `<li>${f}</li>`).join('')}</ul>
+                    <ul>${section.features.map((f, fIndex) => `
+                        <li>
+                            <span class="feature-text">${f}</span>
+                            <div class="feature-item-actions">
+                                <button class="mini-edit-btn" onclick="window.DevritiSupabase.editSectionFeature(${feature.id}, ${sectionIndex}, ${fIndex}, '${f.replace(/'/g, "\\'")}')" title="Edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button class="mini-delete-btn" onclick="window.DevritiSupabase.deleteSectionFeature(${feature.id}, ${sectionIndex}, ${fIndex})" title="Remove">
+                                    <i class="fa-solid fa-times"></i>
+                                </button>
+                            </div>
+                        </li>
+                    `).join('')}</ul>
                 </div>
             `).join('');
         }
@@ -302,6 +335,10 @@ function generateFeatureCard(feature) {
     
     return `
         <div class="feature-card ${highlightClass}" data-feature-id="${feature.id}">
+            <button class="edit-mode-btn" onclick="window.DevritiSupabase.toggleEditMode(${feature.id})">
+                <i class="fa-solid fa-pen-to-square"></i>
+                <span>Edit Mode</span>
+            </button>
             <div class="card-actions">
                 <button class="edit-btn" onclick="window.DevritiSupabase.showEditDialog(${feature.id}, '${feature.feature_name.replace(/'/g, "\\'")}')" title="Edit Card Name">
                     <i class="fa-solid fa-pen"></i>
@@ -516,6 +553,107 @@ function deleteSubFeatureItem(featureId, index) {
     }
 }
 
+// Edit section feature
+function editSectionFeature(featureId, sectionIndex, featureIndex, currentText) {
+    if (!isOnline) {
+        alert('⚠️ You are offline. Please connect to internet.');
+        return;
+    }
+    
+    const newText = prompt('Edit Feature Item:', currentText);
+    if (newText && newText.trim() && newText !== currentText) {
+        showLoading();
+        editSectionFeatureItem(featureId, sectionIndex, featureIndex, newText.trim()).then(success => {
+            hideLoading();
+            if (success) {
+                loadFeaturesFromSupabase();
+            }
+        });
+    }
+}
+
+// Delete section feature
+function deleteSectionFeature(featureId, sectionIndex, featureIndex) {
+    if (!isOnline) {
+        alert('⚠️ You are offline. Please connect to internet.');
+        return;
+    }
+    
+    if (confirm('Remove this feature item?')) {
+        showLoading();
+        deleteSectionFeatureItem(featureId, sectionIndex, featureIndex).then(success => {
+            hideLoading();
+            if (success) {
+                loadFeaturesFromSupabase();
+            }
+        });
+    }
+}
+
+// Edit section feature item in database
+async function editSectionFeatureItem(featureId, sectionIndex, featureIndex, newText) {
+    try {
+        const { data: currentFeature, error: fetchError } = await supabase
+            .from('devriti_features')
+            .select('sub_features')
+            .eq('id', featureId)
+            .single();
+        
+        if (fetchError) throw fetchError;
+        
+        const subFeatures = currentFeature.sub_features || { sections: [] };
+        if (subFeatures.sections && subFeatures.sections[sectionIndex] && subFeatures.sections[sectionIndex].features[featureIndex]) {
+            subFeatures.sections[sectionIndex].features[featureIndex] = newText;
+        }
+        
+        const { error: updateError } = await supabase
+            .from('devriti_features')
+            .update({ sub_features: subFeatures })
+            .eq('id', featureId);
+        
+        if (updateError) throw updateError;
+        
+        showSuccessMessage('✅ Feature item updated!');
+        return true;
+    } catch (error) {
+        console.error('Error editing section feature:', error);
+        showErrorMessage('❌ Failed to update feature item.');
+        return false;
+    }
+}
+
+// Delete section feature item from database
+async function deleteSectionFeatureItem(featureId, sectionIndex, featureIndex) {
+    try {
+        const { data: currentFeature, error: fetchError } = await supabase
+            .from('devriti_features')
+            .select('sub_features')
+            .eq('id', featureId)
+            .single();
+        
+        if (fetchError) throw fetchError;
+        
+        const subFeatures = currentFeature.sub_features || { sections: [] };
+        if (subFeatures.sections && subFeatures.sections[sectionIndex] && subFeatures.sections[sectionIndex].features[featureIndex]) {
+            subFeatures.sections[sectionIndex].features.splice(featureIndex, 1);
+        }
+        
+        const { error: updateError } = await supabase
+            .from('devriti_features')
+            .update({ sub_features: subFeatures })
+            .eq('id', featureId);
+        
+        if (updateError) throw updateError;
+        
+        showSuccessMessage('✅ Feature item removed!');
+        return true;
+    } catch (error) {
+        console.error('Error deleting section feature:', error);
+        showErrorMessage('❌ Failed to remove feature item.');
+        return false;
+    }
+}
+
 // Export functions for use
 window.DevritiSupabase = {
     fetchFeaturesByCategory,
@@ -531,5 +669,8 @@ window.DevritiSupabase = {
     showEditDialog,
     markAsNotRequired,
     editSubFeatureItem,
-    deleteSubFeatureItem
+    deleteSubFeatureItem,
+    toggleEditMode,
+    editSectionFeature,
+    deleteSectionFeature
 };
