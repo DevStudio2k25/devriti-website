@@ -697,7 +697,7 @@ body {
 /* Feature Item Actions */
 .feature-card li {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 0.5rem;
     padding: 0.3rem 0;
@@ -706,6 +706,8 @@ body {
 
 .feature-text {
     flex: 1;
+    padding-left: 1.5rem;
+    position: relative;
 }
 
 .feature-item-actions {
