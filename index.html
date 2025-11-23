@@ -117,6 +117,21 @@
         </div>
     </div>
 
+    <!-- Custom Confirmation Dialog -->
+    <div id="confirmDialog" class="modal">
+        <div class="modal-content confirm-dialog">
+            <div class="confirm-icon">
+                <i class="fa-solid fa-circle-question"></i>
+            </div>
+            <h2 id="confirmTitle">Confirm Action</h2>
+            <p id="confirmMessage">Are you sure you want to proceed?</p>
+            <div class="confirm-actions">
+                <button class="cancel-btn" onclick="window.DevritiSupabase.cancelConfirm()">Cancel</button>
+                <button class="confirm-btn" id="confirmBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <script src="supabase-config.js"></script>
     <script src="script.js"></script>
 </body>

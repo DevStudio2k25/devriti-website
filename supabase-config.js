@@ -396,14 +396,14 @@ function generateFeatureCard(feature) {
                 <li class="${itemClass}">
                     <span class="feature-text">${f} ${itemTag}</span>
                     <div class="feature-item-actions">
-                        <button class="mini-edit-btn" onclick="window.DevritiSupabase.editSubFeatureItem(${feature.id}, ${index}, '${f.replace(/'/g, "\\'")}')" title="Edit">
-                            <i class="fa-solid fa-pen"></i>
-                        </button>
                         ${isNotRequired ? 
                             `<button class="mini-restore-btn" onclick="window.DevritiSupabase.restoreSubFeatureItem(${feature.id}, ${index})" title="Restore">
                                 <i class="fa-solid fa-rotate-left"></i>
                             </button>` :
-                            `<button class="mini-delete-btn" onclick="window.DevritiSupabase.markSubFeatureAsNotRequired(${feature.id}, ${index})" title="Mark Not Required">
+                            `<button class="mini-edit-btn" onclick="window.DevritiSupabase.editSubFeatureItem(${feature.id}, ${index}, '${f.replace(/'/g, "\\'")}')" title="Edit">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button class="mini-delete-btn" onclick="window.DevritiSupabase.markSubFeatureAsNotRequired(${feature.id}, ${index})" title="Mark Not Required">
                                 <i class="fa-solid fa-ban"></i>
                             </button>`
                         }
@@ -442,6 +442,22 @@ function generateFeatureCard(feature) {
             <i class="fa-solid fa-ban"></i>
         </button>`;
     
+    const bottomActions = isCardNotRequired ? 
+        `<div class="card-bottom-actions">
+            <button class="restore-card-btn" onclick="window.DevritiSupabase.restoreCardItem(${feature.id})">
+                <i class="fa-solid fa-rotate-left"></i> Restore Card
+            </button>
+        </div>` :
+        `<div class="card-bottom-actions">
+            <button class="add-sub-feature-btn" onclick="window.DevritiSupabase.showAddSubFeatureDialog(${feature.id}, '${feature.feature_name.replace(/'/g, "\\'")}')" >
+                <i class="fa-solid fa-plus"></i> Add Feature
+            </button>
+            <button class="edit-mode-btn" onclick="window.DevritiSupabase.toggleEditMode(${feature.id})">
+                <i class="fa-solid fa-pen-to-square"></i>
+                <span>Edit Mode</span>
+            </button>
+        </div>`;
+    
     return `
         <div class="feature-card ${highlightClass}" data-feature-id="${feature.id}">
             <div class="card-actions">
@@ -453,15 +469,7 @@ function generateFeatureCard(feature) {
             ${notRequiredTag}
             <h2>${feature.feature_name}</h2>
             ${featuresHTML}
-            <div class="card-bottom-actions">
-                <button class="add-sub-feature-btn" onclick="window.DevritiSupabase.showAddSubFeatureDialog(${feature.id}, '${feature.feature_name.replace(/'/g, "\\'")}')" >
-                    <i class="fa-solid fa-plus"></i> Add Feature
-                </button>
-                <button class="edit-mode-btn" onclick="window.DevritiSupabase.toggleEditMode(${feature.id})">
-                    <i class="fa-solid fa-pen-to-square"></i>
-                    <span>Edit Mode</span>
-                </button>
-            </div>
+            ${bottomActions}
         </div>
     `;
 }
@@ -538,6 +546,43 @@ function closeModals() {
     document.getElementById('addSubFeatureModal').style.display = 'none';
     document.getElementById('editFeatureModal').style.display = 'none';
     document.getElementById('editSubFeatureModal').style.display = 'none';
+    document.getElementById('confirmDialog').style.display = 'none';
+}
+
+// Custom confirmation dialog
+let confirmCallback = null;
+
+function showConfirm(title, message, onConfirm) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirmDialog');
+        const titleEl = document.getElementById('confirmTitle');
+        const messageEl = document.getElementById('confirmMessage');
+        const confirmBtn = document.getElementById('confirmBtn');
+        
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+        
+        confirmCallback = () => {
+            closeModals();
+            resolve(true);
+            if (onConfirm) onConfirm();
+        };
+        
+        modal.style.display = 'block';
+    });
+}
+
+function cancelConfirm() {
+    closeModals();
+    if (confirmCallback) {
+        confirmCallback = null;
+    }
+}
+
+function handleConfirm() {
+    if (confirmCallback) {
+        confirmCallback();
+    }
 }
 
 // Handle add feature form submit
@@ -647,15 +692,19 @@ function markCardAsNotRequired(featureId) {
         return;
     }
     
-    if (confirm('Mark this card as "Not Required"?')) {
-        showLoading();
-        markCardNotRequired(featureId).then(success => {
-            hideLoading();
-            if (success) {
-                loadFeaturesFromSupabase();
-            }
-        });
-    }
+    showConfirm(
+        'Mark as Not Required',
+        'Are you sure you want to mark this card as "Not Required"?',
+        () => {
+            showLoading();
+            markCardNotRequired(featureId).then(success => {
+                hideLoading();
+                if (success) {
+                    loadFeaturesFromSupabase();
+                }
+            });
+        }
+    );
 }
 
 // Restore card
@@ -665,15 +714,19 @@ function restoreCardItem(featureId) {
         return;
     }
     
-    if (confirm('Restore this card?')) {
-        showLoading();
-        restoreCard(featureId).then(success => {
-            hideLoading();
-            if (success) {
-                loadFeaturesFromSupabase();
-            }
-        });
-    }
+    showConfirm(
+        'Restore Card',
+        'Do you want to restore this card?',
+        () => {
+            showLoading();
+            restoreCard(featureId).then(success => {
+                hideLoading();
+                if (success) {
+                    loadFeaturesFromSupabase();
+                }
+            });
+        }
+    );
 }
 
 // Mark sub-feature as not required
@@ -683,15 +736,19 @@ function markSubFeatureAsNotRequired(featureId, index) {
         return;
     }
     
-    if (confirm('Mark this feature as "Not Required"?')) {
-        showLoading();
-        markSubFeatureNotRequired(featureId, index).then(success => {
-            hideLoading();
-            if (success) {
-                loadFeaturesFromSupabase();
-            }
-        });
-    }
+    showConfirm(
+        'Mark as Not Required',
+        'Are you sure you want to mark this feature as "Not Required"?',
+        () => {
+            showLoading();
+            markSubFeatureNotRequired(featureId, index).then(success => {
+                hideLoading();
+                if (success) {
+                    loadFeaturesFromSupabase();
+                }
+            });
+        }
+    );
 }
 
 // Restore sub-feature
@@ -701,15 +758,19 @@ function restoreSubFeatureItem(featureId, index) {
         return;
     }
     
-    if (confirm('Restore this feature?')) {
-        showLoading();
-        restoreSubFeature(featureId, index).then(success => {
-            hideLoading();
-            if (success) {
-                loadFeaturesFromSupabase();
-            }
-        });
-    }
+    showConfirm(
+        'Restore Feature',
+        'Do you want to restore this feature?',
+        () => {
+            showLoading();
+            restoreSubFeature(featureId, index).then(success => {
+                hideLoading();
+                if (success) {
+                    loadFeaturesFromSupabase();
+                }
+            });
+        }
+    );
 }
 
 // Edit sub-feature item
@@ -773,15 +834,19 @@ function deleteSectionFeature(featureId, sectionIndex, featureIndex) {
         return;
     }
     
-    if (confirm('Remove this feature item?')) {
-        showLoading();
-        deleteSectionFeatureItem(featureId, sectionIndex, featureIndex).then(success => {
-            hideLoading();
-            if (success) {
-                loadFeaturesFromSupabase();
-            }
-        });
-    }
+    showConfirm(
+        'Remove Feature',
+        'Are you sure you want to remove this feature item?',
+        () => {
+            showLoading();
+            deleteSectionFeatureItem(featureId, sectionIndex, featureIndex).then(success => {
+                hideLoading();
+                if (success) {
+                    loadFeaturesFromSupabase();
+                }
+            });
+        }
+    );
 }
 
 // Edit section feature item in database
@@ -871,5 +936,8 @@ window.DevritiSupabase = {
     deleteSubFeatureItem,
     toggleEditMode,
     editSectionFeature,
-    deleteSectionFeature
+    deleteSectionFeature,
+    showConfirm,
+    cancelConfirm,
+    handleConfirm
 };

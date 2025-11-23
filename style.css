@@ -188,17 +188,24 @@ body {
     margin-bottom: 0.8rem;
     color: var(--text-secondary);
     font-size: 0.95rem;
+    line-height: 1.6;
 }
 
 .feature-card li::before {
     content: '';
     position: absolute;
     left: 0.3rem;
-    top: 0.6rem;
-    width: 6px;
-    height: 6px;
+    top: 0.65rem;
+    width: 7px;
+    height: 7px;
     background-color: var(--accent-dark);
     border-radius: 50%;
+    z-index: 1;
+}
+
+/* Hide bullet for not required items */
+.feature-card li.not-required-item::before {
+    display: none;
 }
 
 .sub-section {
@@ -818,4 +825,100 @@ body {
 
 .feature-card.edit-mode .add-subsection-btn {
     display: inline-block;
+}
+
+
+/* Custom Confirmation Dialog */
+.confirm-dialog {
+    text-align: center;
+    max-width: 400px;
+}
+
+.confirm-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1rem;
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+}
+
+.confirm-dialog h2 {
+    margin-bottom: 1rem;
+    color: var(--text-main);
+}
+
+.confirm-dialog p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.cancel-btn,
+.confirm-btn {
+    flex: 1;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.cancel-btn {
+    background-color: var(--accent-light);
+    color: var(--accent-dark);
+}
+
+.cancel-btn:hover {
+    background-color: var(--accent-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.confirm-btn {
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
+    color: white;
+}
+
+.confirm-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(142, 130, 112, 0.4);
+}
+
+
+/* Restore Card Button */
+.restore-card-btn {
+    width: 100%;
+    padding: 0.8rem 1.2rem;
+    background: linear-gradient(135deg, #7FB069, #6A9A5B);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.restore-card-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(127, 176, 105, 0.4);
 }
