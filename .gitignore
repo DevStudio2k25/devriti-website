@@ -1,0 +1,13 @@
+# Backup files
+index-backup.html
+add-feature-modal.html
+firebase-debug.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+.kiro/

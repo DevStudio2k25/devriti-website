@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devriti - Feature Showcase</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="main-header">
+            <div class="logo-container">
+                <h1>Devriti</h1>
+                <p class="subtitle">Empowering Mental Wellness</p>
+            </div>
+            <nav class="tab-nav">
+                <button class="tab-btn active" data-tab="core">Core Features</button>
+                <button class="tab-btn" data-tab="ai">AI Intelligence</button>
+                <button class="tab-btn" data-tab="future">Future Roadmap</button>
+            </nav>
+        </header>
+
+        <main class="content-area">
+            <!-- Core Features Tab -->
+            <section id="core" class="tab-content active">
+                <div class="features-grid">
+                    <!-- Features will load from Supabase -->
+                </div>
+            </section>
+
+            <!-- AI Intelligence Tab -->
+            <section id="ai" class="tab-content">
+                <div class="features-grid">
+                    <!-- Features will load from Supabase -->
+                </div>
+            </section>
+
+            <!-- Future Roadmap Tab -->
+            <section id="future" class="tab-content">
+                <div class="features-grid">
+                    <!-- Features will load from Supabase -->
+                </div>
+            </section>
+        </main>
+
+        <footer class="main-footer">
+            <p>&copy; 2025 Devriti. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Add Feature Modal -->
+    <div id="addFeatureModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="window.DevritiSupabase.closeModals()">&times;</span>
+            <h2>Add New Feature</h2>
+            <form id="addFeatureForm">
+                <div class="form-group">
+                    <label>Feature Name</label>
+                    <input type="text" id="featureName" placeholder="e.g., Mood Tracker" required>
+                </div>
+                <button type="submit" class="submit-btn">Add Feature</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Sub-Feature Modal -->
+    <div id="addSubFeatureModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="window.DevritiSupabase.closeModals()">&times;</span>
+            <h2>Add Feature Item</h2>
+            <p id="subFeatureCardName" style="color: var(--accent-dark); margin-bottom: 1rem;"></p>
+            <form id="addSubFeatureForm">
+                <div class="form-group">
+                    <label>Feature Description</label>
+                    <textarea id="subFeatureText" placeholder="Enter feature description..." rows="3" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Add Item</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="supabase-config.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
