@@ -65,7 +65,7 @@ body {
 .tab-nav {
     display: flex;
     justify-content: center;
-    gap: 1rem;
+    gap: 0.5rem;
     margin-top: 2rem;
     background: var(--card-bg);
     padding: 0.5rem;
@@ -74,6 +74,7 @@ body {
     width: fit-content;
     margin-left: auto;
     margin-right: auto;
+    flex-wrap: wrap;
 }
 
 .tab-btn {
@@ -87,6 +88,7 @@ body {
     color: var(--text-secondary);
     cursor: pointer;
     transition: var(--transition);
+    white-space: nowrap;
 }
 
 .tab-btn.active {
@@ -313,11 +315,71 @@ body {
     }
 
     .logo-container h1 {
-        font-size: 2.5rem;
+        font-size: 2rem;
+    }
+
+    .subtitle {
+        font-size: 0.9rem;
     }
 
     .features-grid {
         column-count: 1;
+    }
+
+    /* Compact tabs for mobile */
+    .tab-nav {
+        width: 100%;
+        padding: 0.3rem;
+        gap: 0.3rem;
+        border-radius: 12px;
+    }
+
+    .tab-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* Show only first word on mobile */
+    .tab-btn::after {
+        content: attr(data-short);
+    }
+
+    .tab-btn {
+        font-size: 0;
+    }
+
+    .tab-btn::after {
+        font-size: 0.85rem;
+    }
+
+    /* Modal adjustments */
+    .modal-content {
+        margin: 5% auto;
+        width: 95%;
+        padding: 1.5rem;
+    }
+
+    .modal-content h2 {
+        font-size: 1.3rem;
+    }
+
+    /* Feature cards */
+    .feature-card {
+        padding: 1.5rem;
+    }
+
+    .feature-card h2 {
+        font-size: 1.3rem;
+    }
+
+    /* Toast messages */
+    .toast-message {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+        font-size: 0.9rem;
     }
 }
 
