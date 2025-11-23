@@ -637,3 +637,69 @@ body {
     text-decoration: line-through;
     color: var(--text-secondary);
 }
+
+/* Feature Item Actions */
+.feature-card li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+    transition: var(--transition);
+}
+
+.feature-card li:hover {
+    background-color: var(--accent-light);
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    border-radius: 6px;
+}
+
+.feature-text {
+    flex: 1;
+}
+
+.feature-item-actions {
+    display: flex;
+    gap: 0.3rem;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.feature-card li:hover .feature-item-actions {
+    opacity: 1;
+}
+
+.mini-edit-btn,
+.mini-delete-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    font-size: 0.7rem;
+}
+
+.mini-edit-btn {
+    background-color: #4A90E2;
+    color: white;
+}
+
+.mini-edit-btn:hover {
+    background-color: #357ABD;
+    transform: scale(1.1);
+}
+
+.mini-delete-btn {
+    background-color: #E74C3C;
+    color: white;
+}
+
+.mini-delete-btn:hover {
+    background-color: #C0392B;
+    transform: scale(1.1);
+}

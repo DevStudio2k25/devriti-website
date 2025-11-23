@@ -201,6 +201,70 @@ async function editFeatureName(featureId, newName) {
     }
 }
 
+// Delete sub-feature from card
+async function deleteSubFeature(featureId, featureIndex) {
+    try {
+        const { data: currentFeature, error: fetchError } = await supabase
+            .from('devriti_features')
+            .select('sub_features')
+            .eq('id', featureId)
+            .single();
+        
+        if (fetchError) throw fetchError;
+        
+        const subFeatures = currentFeature.sub_features || { features: [] };
+        if (subFeatures.features && subFeatures.features[featureIndex]) {
+            subFeatures.features.splice(featureIndex, 1);
+        }
+        
+        const { error: updateError } = await supabase
+            .from('devriti_features')
+            .update({ sub_features: subFeatures })
+            .eq('id', featureId);
+        
+        if (updateError) throw updateError;
+        
+        showSuccessMessage('✅ Feature item removed!');
+        return true;
+    } catch (error) {
+        console.error('Error deleting sub-feature:', error);
+        showErrorMessage('❌ Failed to remove feature item.');
+        return false;
+    }
+}
+
+// Edit sub-feature
+async function editSubFeature(featureId, featureIndex, newText) {
+    try {
+        const { data: currentFeature, error: fetchError } = await supabase
+            .from('devriti_features')
+            .select('sub_features')
+            .eq('id', featureId)
+            .single();
+        
+        if (fetchError) throw fetchError;
+        
+        const subFeatures = currentFeature.sub_features || { features: [] };
+        if (subFeatures.features && subFeatures.features[featureIndex]) {
+            subFeatures.features[featureIndex] = newText;
+        }
+        
+        const { error: updateError } = await supabase
+            .from('devriti_features')
+            .update({ sub_features: subFeatures })
+            .eq('id', featureId);
+        
+        if (updateError) throw updateError;
+        
+        showSuccessMessage('✅ Feature item updated!');
+        return true;
+    } catch (error) {
+        console.error('Error editing sub-feature:', error);
+        showErrorMessage('❌ Failed to update feature item.');
+        return false;
+    }
+}
+
 // Generate feature card HTML from database data
 function generateFeatureCard(feature) {
     const highlightClass = feature.is_highlight ? 'highlight not-required' : '';
@@ -211,7 +275,19 @@ function generateFeatureCard(feature) {
         const subFeatures = feature.sub_features;
         
         if (subFeatures.features) {
-            featuresHTML = '<ul>' + subFeatures.features.map(f => `<li>${f}</li>`).join('') + '</ul>';
+            featuresHTML = '<ul>' + subFeatures.features.map((f, index) => `
+                <li>
+                    <span class="feature-text">${f}</span>
+                    <div class="feature-item-actions">
+                        <button class="mini-edit-btn" onclick="window.DevritiSupabase.editSubFeatureItem(${feature.id}, ${index}, '${f.replace(/'/g, "\\'")}')" title="Edit">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="mini-delete-btn" onclick="window.DevritiSupabase.deleteSubFeatureItem(${feature.id}, ${index})" title="Remove">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+                </li>
+            `).join('') + '</ul>';
         }
         
         if (subFeatures.sections) {
@@ -227,7 +303,7 @@ function generateFeatureCard(feature) {
     return `
         <div class="feature-card ${highlightClass}" data-feature-id="${feature.id}">
             <div class="card-actions">
-                <button class="edit-btn" onclick="window.DevritiSupabase.showEditDialog(${feature.id}, '${feature.feature_name}')" title="Edit">
+                <button class="edit-btn" onclick="window.DevritiSupabase.showEditDialog(${feature.id}, '${feature.feature_name.replace(/'/g, "\\'")}')" title="Edit Card Name">
                     <i class="fa-solid fa-pen"></i>
                 </button>
                 <button class="delete-btn" onclick="window.DevritiSupabase.markAsNotRequired(${feature.id})" title="Mark as Not Required">
@@ -237,7 +313,7 @@ function generateFeatureCard(feature) {
             ${notRequiredTag}
             <h2>${feature.feature_name}</h2>
             ${featuresHTML}
-            <button class="add-sub-feature-btn" onclick="window.DevritiSupabase.showAddSubFeatureDialog(${feature.id}, '${feature.feature_name}')">
+            <button class="add-sub-feature-btn" onclick="window.DevritiSupabase.showAddSubFeatureDialog(${feature.id}, '${feature.feature_name.replace(/'/g, "\\'")}')" >
                 <i class="fa-solid fa-plus"></i> Add Feature
             </button>
         </div>
@@ -403,6 +479,43 @@ function markAsNotRequired(featureId) {
     }
 }
 
+// Edit sub-feature item
+function editSubFeatureItem(featureId, index, currentText) {
+    if (!isOnline) {
+        alert('⚠️ You are offline. Please connect to internet.');
+        return;
+    }
+    
+    const newText = prompt('Edit Feature Item:', currentText);
+    if (newText && newText.trim() && newText !== currentText) {
+        showLoading();
+        editSubFeature(featureId, index, newText.trim()).then(success => {
+            hideLoading();
+            if (success) {
+                loadFeaturesFromSupabase();
+            }
+        });
+    }
+}
+
+// Delete sub-feature item
+function deleteSubFeatureItem(featureId, index) {
+    if (!isOnline) {
+        alert('⚠️ You are offline. Please connect to internet.');
+        return;
+    }
+    
+    if (confirm('Remove this feature item?')) {
+        showLoading();
+        deleteSubFeature(featureId, index).then(success => {
+            hideLoading();
+            if (success) {
+                loadFeaturesFromSupabase();
+            }
+        });
+    }
+}
+
 // Export functions for use
 window.DevritiSupabase = {
     fetchFeaturesByCategory,
@@ -416,5 +529,7 @@ window.DevritiSupabase = {
     handleAddFeatureSubmit,
     handleAddSubFeatureSubmit,
     showEditDialog,
-    markAsNotRequired
+    markAsNotRequired,
+    editSubFeatureItem,
+    deleteSubFeatureItem
 };
