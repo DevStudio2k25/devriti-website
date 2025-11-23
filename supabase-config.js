@@ -163,21 +163,110 @@ function showErrorMessage(message) {
     }, 3000);
 }
 
-// Delete/Mark feature as not required
-async function markFeatureNotRequired(featureId) {
+// Mark card as not required
+async function markCardNotRequired(featureId) {
     try {
         const { error } = await supabase
             .from('devriti_features')
-            .update({ is_highlight: true })
+            .update({ is_card_not_required: true })
             .eq('id', featureId);
         
         if (error) throw error;
         
-        showSuccessMessage('✅ Marked as Not Required!');
+        showSuccessMessage('✅ Card marked as Not Required!');
+        return true;
+    } catch (error) {
+        console.error('Error marking card:', error);
+        showErrorMessage('❌ Failed to mark card.');
+        return false;
+    }
+}
+
+// Restore card from not required
+async function restoreCard(featureId) {
+    try {
+        const { error } = await supabase
+            .from('devriti_features')
+            .update({ is_card_not_required: false })
+            .eq('id', featureId);
+        
+        if (error) throw error;
+        
+        showSuccessMessage('✅ Card restored!');
+        return true;
+    } catch (error) {
+        console.error('Error restoring card:', error);
+        showErrorMessage('❌ Failed to restore card.');
+        return false;
+    }
+}
+
+// Mark sub-feature as not required
+async function markSubFeatureNotRequired(featureId, featureIndex) {
+    try {
+        const { data: currentFeature, error: fetchError } = await supabase
+            .from('devriti_features')
+            .select('sub_features')
+            .eq('id', featureId)
+            .single();
+        
+        if (fetchError) throw fetchError;
+        
+        const subFeatures = currentFeature.sub_features || { features: [] };
+        if (subFeatures.features && subFeatures.features[featureIndex]) {
+            if (!subFeatures.not_required) {
+                subFeatures.not_required = [];
+            }
+            subFeatures.not_required.push(featureIndex);
+        }
+        
+        const { error: updateError } = await supabase
+            .from('devriti_features')
+            .update({ sub_features: subFeatures })
+            .eq('id', featureId);
+        
+        if (updateError) throw updateError;
+        
+        showSuccessMessage('✅ Feature marked as Not Required!');
         return true;
     } catch (error) {
         console.error('Error marking feature:', error);
         showErrorMessage('❌ Failed to mark feature.');
+        return false;
+    }
+}
+
+// Restore sub-feature
+async function restoreSubFeature(featureId, featureIndex) {
+    try {
+        const { data: currentFeature, error: fetchError } = await supabase
+            .from('devriti_features')
+            .select('sub_features')
+            .eq('id', featureId)
+            .single();
+        
+        if (fetchError) throw fetchError;
+        
+        const subFeatures = currentFeature.sub_features || { features: [] };
+        if (subFeatures.not_required) {
+            const idx = subFeatures.not_required.indexOf(featureIndex);
+            if (idx > -1) {
+                subFeatures.not_required.splice(idx, 1);
+            }
+        }
+        
+        const { error: updateError } = await supabase
+            .from('devriti_features')
+            .update({ sub_features: subFeatures })
+            .eq('id', featureId);
+        
+        if (updateError) throw updateError;
+        
+        showSuccessMessage('✅ Feature restored!');
+        return true;
+    } catch (error) {
+        console.error('Error restoring feature:', error);
+        showErrorMessage('❌ Failed to restore feature.');
         return false;
     }
 }
@@ -288,27 +377,39 @@ function toggleEditMode(featureId) {
 
 // Generate feature card HTML from database data
 function generateFeatureCard(feature) {
-    const highlightClass = feature.is_highlight ? 'highlight not-required' : '';
-    const notRequiredTag = feature.is_highlight ? '<span class="not-required-tag">Not Required</span>' : '';
+    const isCardNotRequired = feature.is_card_not_required || false;
+    const highlightClass = isCardNotRequired ? 'not-required' : '';
+    const notRequiredTag = isCardNotRequired ? '<span class="not-required-tag">Not Required</span>' : '';
     let featuresHTML = '';
     
     if (feature.sub_features) {
         const subFeatures = feature.sub_features;
+        const notRequiredList = subFeatures.not_required || [];
         
         if (subFeatures.features && subFeatures.features.length > 0) {
-            featuresHTML = '<ul>' + subFeatures.features.map((f, index) => `
-                <li>
-                    <span class="feature-text">${f}</span>
+            featuresHTML = '<ul>' + subFeatures.features.map((f, index) => {
+                const isNotRequired = notRequiredList.includes(index);
+                const itemClass = isNotRequired ? 'not-required-item' : '';
+                const itemTag = isNotRequired ? '<span class="mini-not-required-tag">Not Required</span>' : '';
+                
+                return `
+                <li class="${itemClass}">
+                    <span class="feature-text">${f} ${itemTag}</span>
                     <div class="feature-item-actions">
                         <button class="mini-edit-btn" onclick="window.DevritiSupabase.editSubFeatureItem(${feature.id}, ${index}, '${f.replace(/'/g, "\\'")}')" title="Edit">
                             <i class="fa-solid fa-pen"></i>
                         </button>
-                        <button class="mini-delete-btn" onclick="window.DevritiSupabase.deleteSubFeatureItem(${feature.id}, ${index})" title="Remove">
-                            <i class="fa-solid fa-times"></i>
-                        </button>
+                        ${isNotRequired ? 
+                            `<button class="mini-restore-btn" onclick="window.DevritiSupabase.restoreSubFeatureItem(${feature.id}, ${index})" title="Restore">
+                                <i class="fa-solid fa-rotate-left"></i>
+                            </button>` :
+                            `<button class="mini-delete-btn" onclick="window.DevritiSupabase.markSubFeatureAsNotRequired(${feature.id}, ${index})" title="Mark Not Required">
+                                <i class="fa-solid fa-ban"></i>
+                            </button>`
+                        }
                     </div>
                 </li>
-            `).join('') + '</ul>';
+            `}).join('') + '</ul>';
         }
         
         if (subFeatures.sections && subFeatures.sections.length > 0) {
@@ -322,8 +423,8 @@ function generateFeatureCard(feature) {
                                 <button class="mini-edit-btn" onclick="window.DevritiSupabase.editSectionFeature(${feature.id}, ${sectionIndex}, ${fIndex}, '${f.replace(/'/g, "\\'")}')" title="Edit">
                                     <i class="fa-solid fa-pen"></i>
                                 </button>
-                                <button class="mini-delete-btn" onclick="window.DevritiSupabase.deleteSectionFeature(${feature.id}, ${sectionIndex}, ${fIndex})" title="Remove">
-                                    <i class="fa-solid fa-times"></i>
+                                <button class="mini-delete-btn" onclick="window.DevritiSupabase.deleteSectionFeature(${feature.id}, ${sectionIndex}, ${fIndex})" title="Mark Not Required">
+                                    <i class="fa-solid fa-ban"></i>
                                 </button>
                             </div>
                         </li>
@@ -333,26 +434,34 @@ function generateFeatureCard(feature) {
         }
     }
     
+    const cardActionBtn = isCardNotRequired ? 
+        `<button class="delete-btn" onclick="window.DevritiSupabase.restoreCardItem(${feature.id})" title="Restore Card">
+            <i class="fa-solid fa-rotate-left"></i>
+        </button>` :
+        `<button class="delete-btn" onclick="window.DevritiSupabase.markCardAsNotRequired(${feature.id})" title="Mark Card as Not Required">
+            <i class="fa-solid fa-ban"></i>
+        </button>`;
+    
     return `
         <div class="feature-card ${highlightClass}" data-feature-id="${feature.id}">
-            <button class="edit-mode-btn" onclick="window.DevritiSupabase.toggleEditMode(${feature.id})">
-                <i class="fa-solid fa-pen-to-square"></i>
-                <span>Edit Mode</span>
-            </button>
             <div class="card-actions">
                 <button class="edit-btn" onclick="window.DevritiSupabase.showEditDialog(${feature.id}, '${feature.feature_name.replace(/'/g, "\\'")}')" title="Edit Card Name">
                     <i class="fa-solid fa-pen"></i>
                 </button>
-                <button class="delete-btn" onclick="window.DevritiSupabase.markAsNotRequired(${feature.id})" title="Mark as Not Required">
-                    <i class="fa-solid fa-ban"></i>
-                </button>
+                ${cardActionBtn}
             </div>
             ${notRequiredTag}
             <h2>${feature.feature_name}</h2>
             ${featuresHTML}
-            <button class="add-sub-feature-btn" onclick="window.DevritiSupabase.showAddSubFeatureDialog(${feature.id}, '${feature.feature_name.replace(/'/g, "\\'")}')" >
-                <i class="fa-solid fa-plus"></i> Add Feature
-            </button>
+            <div class="card-bottom-actions">
+                <button class="add-sub-feature-btn" onclick="window.DevritiSupabase.showAddSubFeatureDialog(${feature.id}, '${feature.feature_name.replace(/'/g, "\\'")}')" >
+                    <i class="fa-solid fa-plus"></i> Add Feature
+                </button>
+                <button class="edit-mode-btn" onclick="window.DevritiSupabase.toggleEditMode(${feature.id})">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>Edit Mode</span>
+                </button>
+            </div>
         </div>
     `;
 }
@@ -498,8 +607,44 @@ function showEditDialog(featureId, currentName) {
     }
 }
 
-// Mark as not required
-function markAsNotRequired(featureId) {
+// Mark card as not required
+function markCardAsNotRequired(featureId) {
+    if (!isOnline) {
+        alert('⚠️ You are offline. Please connect to internet.');
+        return;
+    }
+    
+    if (confirm('Mark this card as "Not Required"?')) {
+        showLoading();
+        markCardNotRequired(featureId).then(success => {
+            hideLoading();
+            if (success) {
+                loadFeaturesFromSupabase();
+            }
+        });
+    }
+}
+
+// Restore card
+function restoreCardItem(featureId) {
+    if (!isOnline) {
+        alert('⚠️ You are offline. Please connect to internet.');
+        return;
+    }
+    
+    if (confirm('Restore this card?')) {
+        showLoading();
+        restoreCard(featureId).then(success => {
+            hideLoading();
+            if (success) {
+                loadFeaturesFromSupabase();
+            }
+        });
+    }
+}
+
+// Mark sub-feature as not required
+function markSubFeatureAsNotRequired(featureId, index) {
     if (!isOnline) {
         alert('⚠️ You are offline. Please connect to internet.');
         return;
@@ -507,7 +652,25 @@ function markAsNotRequired(featureId) {
     
     if (confirm('Mark this feature as "Not Required"?')) {
         showLoading();
-        markFeatureNotRequired(featureId).then(success => {
+        markSubFeatureNotRequired(featureId, index).then(success => {
+            hideLoading();
+            if (success) {
+                loadFeaturesFromSupabase();
+            }
+        });
+    }
+}
+
+// Restore sub-feature
+function restoreSubFeatureItem(featureId, index) {
+    if (!isOnline) {
+        alert('⚠️ You are offline. Please connect to internet.');
+        return;
+    }
+    
+    if (confirm('Restore this feature?')) {
+        showLoading();
+        restoreSubFeature(featureId, index).then(success => {
             hideLoading();
             if (success) {
                 loadFeaturesFromSupabase();
@@ -667,7 +830,10 @@ window.DevritiSupabase = {
     handleAddFeatureSubmit,
     handleAddSubFeatureSubmit,
     showEditDialog,
-    markAsNotRequired,
+    markCardAsNotRequired,
+    restoreCardItem,
+    markSubFeatureAsNotRequired,
+    restoreSubFeatureItem,
     editSubFeatureItem,
     deleteSubFeatureItem,
     toggleEditMode,

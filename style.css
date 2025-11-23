@@ -247,7 +247,6 @@ body {
 
 /* Add Feature Button */
 .add-sub-feature-btn {
-    margin-top: 1rem;
     padding: 0.6rem 1.2rem;
     background-color: var(--accent-light);
     color: var(--accent-dark);
@@ -258,7 +257,6 @@ body {
     font-weight: 500;
     cursor: pointer;
     transition: var(--transition);
-    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -382,25 +380,14 @@ body {
         font-size: 0.9rem;
     }
 
-    /* Always show edit mode button on mobile */
-    .edit-mode-btn {
-        opacity: 1;
-        position: relative;
-        top: 0;
-        left: 0;
-        margin-bottom: 1rem;
+    /* Card bottom actions on mobile */
+    .card-bottom-actions {
+        flex-direction: column;
+    }
+
+    .edit-mode-btn,
+    .add-sub-feature-btn {
         width: 100%;
-        justify-content: center;
-    }
-
-    /* Always show card actions on mobile */
-    .card-actions {
-        opacity: 1;
-    }
-
-    /* Show feature item actions in edit mode on mobile */
-    .feature-card.edit-mode .feature-item-actions {
-        display: flex;
     }
 }
 
@@ -591,22 +578,27 @@ body {
     position: absolute;
     top: 1rem;
     right: 1rem;
-    display: flex;
+    display: none;
     gap: 0.5rem;
-    opacity: 0;
     transition: var(--transition);
 }
 
-.feature-card:hover .card-actions {
-    opacity: 1;
+.feature-card.edit-mode .card-actions {
+    display: flex;
+}
+
+/* Card Bottom Actions */
+.card-bottom-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
 }
 
 .edit-mode-btn {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    width: auto;
-    padding: 0.5rem 1rem;
+    flex: 1;
+    min-width: 120px;
+    padding: 0.6rem 1rem;
     background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
     color: white;
     border: none;
@@ -617,9 +609,9 @@ body {
     font-weight: 500;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
     transition: var(--transition);
-    z-index: 10;
 }
 
 .edit-mode-btn:hover {
@@ -629,6 +621,11 @@ body {
 
 .edit-mode-btn.active {
     background: linear-gradient(135deg, #8E8270, #6B6B6B);
+}
+
+.add-sub-feature-btn {
+    flex: 1;
+    min-width: 120px;
 }
 
 .edit-btn,
@@ -699,13 +696,6 @@ body {
     transition: var(--transition);
 }
 
-.feature-card li:hover {
-    background-color: var(--accent-light);
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-    border-radius: 6px;
-}
-
 .feature-text {
     flex: 1;
 }
@@ -720,12 +710,9 @@ body {
     display: flex;
 }
 
-.feature-card li:hover .feature-item-actions {
-    display: flex;
-}
-
 .mini-edit-btn,
-.mini-delete-btn {
+.mini-delete-btn,
+.mini-restore-btn {
     width: 24px;
     height: 24px;
     border: none;
@@ -756,6 +743,39 @@ body {
 .mini-delete-btn:hover {
     transform: scale(1.1);
     box-shadow: 0 3px 10px rgba(212, 165, 116, 0.4);
+}
+
+.mini-restore-btn {
+    background: linear-gradient(135deg, #7FB069, #6A9A5B);
+    color: white;
+}
+
+.mini-restore-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 3px 10px rgba(127, 176, 105, 0.4);
+}
+
+/* Not Required Item Styling */
+.not-required-item {
+    opacity: 0.6;
+}
+
+.not-required-item .feature-text {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+}
+
+.mini-not-required-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, #D4A574, #B8956A);
+    color: white;
+    padding: 0.15rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
 /* Sub-section styling */
