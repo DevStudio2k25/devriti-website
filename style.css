@@ -1,13 +1,13 @@
 :root {
-    --bg-color: #FDFBF7;
-    --card-bg: #FFFFFF;
-    --text-main: #4A4A4A;
-    --text-secondary: #7D7D7D;
-    --accent-color: #D4C5A9;
-    --accent-dark: #A89B85;
-    --accent-light: #F2EFE9;
-    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.03);
-    --shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.06);
+    --bg-color: #E8E3D8;
+    --card-bg: #F5F1E8;
+    --text-main: #3A3A3A;
+    --text-secondary: #6B6B6B;
+    --accent-color: #C4B59A;
+    --accent-dark: #8E8270;
+    --accent-light: #DED9CE;
+    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.12);
     --border-radius: 16px;
     --transition: all 0.3s ease;
 }
