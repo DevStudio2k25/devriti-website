@@ -563,3 +563,77 @@ body {
 .toast-message i {
     font-size: 1.2rem;
 }
+
+
+/* Card Actions */
+.card-actions {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.feature-card:hover .card-actions {
+    opacity: 1;
+}
+
+.edit-btn,
+.delete-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    font-size: 0.9rem;
+}
+
+.edit-btn {
+    background-color: #4A90E2;
+    color: white;
+}
+
+.edit-btn:hover {
+    background-color: #357ABD;
+    transform: scale(1.1);
+}
+
+.delete-btn {
+    background-color: #E74C3C;
+    color: white;
+}
+
+.delete-btn:hover {
+    background-color: #C0392B;
+    transform: scale(1.1);
+}
+
+/* Not Required Tag */
+.not-required-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, #E74C3C, #C0392B);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.feature-card.not-required {
+    opacity: 0.6;
+    border: 2px dashed #E74C3C;
+}
+
+.feature-card.not-required h2 {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+}

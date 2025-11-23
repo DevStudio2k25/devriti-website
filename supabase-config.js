@@ -163,9 +163,48 @@ function showErrorMessage(message) {
     }, 3000);
 }
 
+// Delete/Mark feature as not required
+async function markFeatureNotRequired(featureId) {
+    try {
+        const { error } = await supabase
+            .from('devriti_features')
+            .update({ is_highlight: true })
+            .eq('id', featureId);
+        
+        if (error) throw error;
+        
+        showSuccessMessage('✅ Marked as Not Required!');
+        return true;
+    } catch (error) {
+        console.error('Error marking feature:', error);
+        showErrorMessage('❌ Failed to mark feature.');
+        return false;
+    }
+}
+
+// Edit feature name
+async function editFeatureName(featureId, newName) {
+    try {
+        const { error } = await supabase
+            .from('devriti_features')
+            .update({ feature_name: newName })
+            .eq('id', featureId);
+        
+        if (error) throw error;
+        
+        showSuccessMessage('✅ Feature updated!');
+        return true;
+    } catch (error) {
+        console.error('Error updating feature:', error);
+        showErrorMessage('❌ Failed to update feature.');
+        return false;
+    }
+}
+
 // Generate feature card HTML from database data
 function generateFeatureCard(feature) {
-    const highlightClass = feature.is_highlight ? 'highlight' : '';
+    const highlightClass = feature.is_highlight ? 'highlight not-required' : '';
+    const notRequiredTag = feature.is_highlight ? '<span class="not-required-tag">Not Required</span>' : '';
     let featuresHTML = '';
     
     if (feature.sub_features) {
@@ -187,9 +226,18 @@ function generateFeatureCard(feature) {
     
     return `
         <div class="feature-card ${highlightClass}" data-feature-id="${feature.id}">
+            <div class="card-actions">
+                <button class="edit-btn" onclick="window.DevritiSupabase.showEditDialog(${feature.id}, '${feature.feature_name}')" title="Edit">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="delete-btn" onclick="window.DevritiSupabase.markAsNotRequired(${feature.id})" title="Mark as Not Required">
+                    <i class="fa-solid fa-ban"></i>
+                </button>
+            </div>
+            ${notRequiredTag}
             <h2>${feature.feature_name}</h2>
             ${featuresHTML}
-            <button class="add-sub-feature-btn" onclick="showAddSubFeatureDialog(${feature.id}, '${feature.feature_name}')">
+            <button class="add-sub-feature-btn" onclick="window.DevritiSupabase.showAddSubFeatureDialog(${feature.id}, '${feature.feature_name}')">
                 <i class="fa-solid fa-plus"></i> Add Feature
             </button>
         </div>
@@ -318,6 +366,43 @@ function hideLoading() {
     document.getElementById('loadingOverlay')?.remove();
 }
 
+// Show edit dialog
+function showEditDialog(featureId, currentName) {
+    if (!isOnline) {
+        alert('⚠️ You are offline. Please connect to internet to edit features.');
+        return;
+    }
+    
+    const newName = prompt('Edit Feature Name:', currentName);
+    if (newName && newName.trim() && newName !== currentName) {
+        showLoading();
+        editFeatureName(featureId, newName.trim()).then(success => {
+            hideLoading();
+            if (success) {
+                loadFeaturesFromSupabase();
+            }
+        });
+    }
+}
+
+// Mark as not required
+function markAsNotRequired(featureId) {
+    if (!isOnline) {
+        alert('⚠️ You are offline. Please connect to internet.');
+        return;
+    }
+    
+    if (confirm('Mark this feature as "Not Required"?')) {
+        showLoading();
+        markFeatureNotRequired(featureId).then(success => {
+            hideLoading();
+            if (success) {
+                loadFeaturesFromSupabase();
+            }
+        });
+    }
+}
+
 // Export functions for use
 window.DevritiSupabase = {
     fetchFeaturesByCategory,
@@ -329,5 +414,7 @@ window.DevritiSupabase = {
     showAddNewCardDialog,
     closeModals,
     handleAddFeatureSubmit,
-    handleAddSubFeatureSubmit
+    handleAddSubFeatureSubmit,
+    showEditDialog,
+    markAsNotRequired
 };
