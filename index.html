@@ -87,6 +87,36 @@
         </div>
     </div>
 
+    <!-- Edit Feature Modal -->
+    <div id="editFeatureModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="window.DevritiSupabase.closeModals()">&times;</span>
+            <h2>Edit Feature Name</h2>
+            <form id="editFeatureForm">
+                <div class="form-group">
+                    <label>Feature Name</label>
+                    <input type="text" id="editFeatureName" placeholder="Enter new name..." required>
+                </div>
+                <button type="submit" class="submit-btn">Update</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Sub-Feature Modal -->
+    <div id="editSubFeatureModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="window.DevritiSupabase.closeModals()">&times;</span>
+            <h2>Edit Feature Item</h2>
+            <form id="editSubFeatureForm">
+                <div class="form-group">
+                    <label>Feature Description</label>
+                    <textarea id="editSubFeatureText" placeholder="Enter feature description..." rows="3" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Update</button>
+            </form>
+        </div>
+    </div>
+
     <script src="supabase-config.js"></script>
     <script src="script.js"></script>
 </body>

@@ -536,6 +536,8 @@ function showAddNewCardDialog(category) {
 function closeModals() {
     document.getElementById('addFeatureModal').style.display = 'none';
     document.getElementById('addSubFeatureModal').style.display = 'none';
+    document.getElementById('editFeatureModal').style.display = 'none';
+    document.getElementById('editSubFeatureModal').style.display = 'none';
 }
 
 // Handle add feature form submit
@@ -574,6 +576,42 @@ function handleAddSubFeatureSubmit(e) {
     });
 }
 
+// Handle edit feature form submit
+function handleEditFeatureSubmit(e) {
+    e.preventDefault();
+    
+    const newName = document.getElementById('editFeatureName').value.trim();
+    
+    showLoading();
+    
+    editFeatureName(currentFeatureId, newName).then(success => {
+        hideLoading();
+        if (success) {
+            closeModals();
+            document.getElementById('editFeatureForm').reset();
+            loadFeaturesFromSupabase();
+        }
+    });
+}
+
+// Handle edit sub-feature form submit
+function handleEditSubFeatureSubmit(e) {
+    e.preventDefault();
+    
+    const newText = document.getElementById('editSubFeatureText').value.trim();
+    
+    showLoading();
+    
+    editSubFeature(currentFeatureId, currentSubFeatureIndex, newText).then(success => {
+        hideLoading();
+        if (success) {
+            closeModals();
+            document.getElementById('editSubFeatureForm').reset();
+            loadFeaturesFromSupabase();
+        }
+    });
+}
+
 // Show loading overlay
 function showLoading() {
     const overlay = document.createElement('div');
@@ -595,16 +633,11 @@ function showEditDialog(featureId, currentName) {
         return;
     }
     
-    const newName = prompt('Edit Feature Name:', currentName);
-    if (newName && newName.trim() && newName !== currentName) {
-        showLoading();
-        editFeatureName(featureId, newName.trim()).then(success => {
-            hideLoading();
-            if (success) {
-                loadFeaturesFromSupabase();
-            }
-        });
-    }
+    currentFeatureId = featureId;
+    const modal = document.getElementById('editFeatureModal');
+    const input = document.getElementById('editFeatureName');
+    input.value = currentName;
+    modal.style.display = 'block';
 }
 
 // Mark card as not required
@@ -680,22 +713,20 @@ function restoreSubFeatureItem(featureId, index) {
 }
 
 // Edit sub-feature item
+let currentSubFeatureIndex = null;
+
 function editSubFeatureItem(featureId, index, currentText) {
     if (!isOnline) {
         alert('⚠️ You are offline. Please connect to internet.');
         return;
     }
     
-    const newText = prompt('Edit Feature Item:', currentText);
-    if (newText && newText.trim() && newText !== currentText) {
-        showLoading();
-        editSubFeature(featureId, index, newText.trim()).then(success => {
-            hideLoading();
-            if (success) {
-                loadFeaturesFromSupabase();
-            }
-        });
-    }
+    currentFeatureId = featureId;
+    currentSubFeatureIndex = index;
+    const modal = document.getElementById('editSubFeatureModal');
+    const textarea = document.getElementById('editSubFeatureText');
+    textarea.value = currentText;
+    modal.style.display = 'block';
 }
 
 // Delete sub-feature item
@@ -829,6 +860,8 @@ window.DevritiSupabase = {
     closeModals,
     handleAddFeatureSubmit,
     handleAddSubFeatureSubmit,
+    handleEditFeatureSubmit,
+    handleEditSubFeatureSubmit,
     showEditDialog,
     markCardAsNotRequired,
     restoreCardItem,

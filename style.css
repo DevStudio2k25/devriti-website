@@ -191,11 +191,14 @@ body {
 }
 
 .feature-card li::before {
-    content: '•';
+    content: '';
     position: absolute;
-    left: 0;
-    color: var(--accent-dark);
-    font-weight: bold;
+    left: 0.3rem;
+    top: 0.6rem;
+    width: 6px;
+    height: 6px;
+    background-color: var(--accent-dark);
+    border-radius: 50%;
 }
 
 .sub-section {
@@ -590,14 +593,13 @@ body {
 /* Card Bottom Actions */
 .card-bottom-actions {
     display: flex;
+    flex-direction: column;
     gap: 0.5rem;
     margin-top: 1rem;
-    flex-wrap: wrap;
 }
 
 .edit-mode-btn {
-    flex: 1;
-    min-width: 120px;
+    width: 100%;
     padding: 0.6rem 1rem;
     background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
     color: white;
@@ -624,8 +626,7 @@ body {
 }
 
 .add-sub-feature-btn {
-    flex: 1;
-    min-width: 120px;
+    width: 100%;
 }
 
 .edit-btn,

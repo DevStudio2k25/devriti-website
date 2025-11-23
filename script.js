@@ -32,6 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Setup modal event listeners
     document.getElementById('addFeatureForm').addEventListener('submit', window.DevritiSupabase.handleAddFeatureSubmit);
     document.getElementById('addSubFeatureForm').addEventListener('submit', window.DevritiSupabase.handleAddSubFeatureSubmit);
+    document.getElementById('editFeatureForm').addEventListener('submit', window.DevritiSupabase.handleEditFeatureSubmit);
+    document.getElementById('editSubFeatureForm').addEventListener('submit', window.DevritiSupabase.handleEditSubFeatureSubmit);
 
     // Close modal when clicking outside
     window.onclick = function(event) {
